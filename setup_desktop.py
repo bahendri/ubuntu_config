@@ -8,7 +8,6 @@ TODO:
     * nord themes for tmux and terminator
     * sshd configuration
     * setup dock
-    * symlink to configuration files
     * git global config
 """
 
@@ -19,8 +18,11 @@ import urllib.request
 
 DEV_PKGS = [
     "ack",
+    # need this for vimrc
+    "curl",
     "git",
     "gitk",
+    "ipython3",
     "tmux",
     "tree",
     "vim",
@@ -49,9 +51,18 @@ UI_TWEAKS = [
     ["org.gnome.desktop.interface", "gtk-theme", '"Adwaita-dark"'],
     ["org.gnome.desktop.interface", "cursor-theme", '"Whiteglass"'],
     ["org.gnome.desktop.interface", "icon-theme", '"Humanity"'],
+    #["org.compiz.core:/org/compiz/profiles/unity/plugins/core/", "vsize", "3"]
+]
 
-    ]
+HOME_DIR = Path.home()
+REPO_DIR = Path(__file__).resolve().parent
+CONFIG_DIR = REPO_DIR.joinpath("config_files")
 
+
+SYMLINKS = [
+        ("ssh_config", str(HOME_DIR.joinpath(".ssh", "config"))),
+        ("vimrc", str(HOME_DIR.joinpath(".vimrc")))
+        ]
 def update_drivers():
     """ Install any needed drivers (does nvidia, maybe others?) """
     print("Update drivers")
@@ -110,6 +121,10 @@ def setup_github_keys():
     else:
         subprocess.run(f"xclip -sel clip < $HOME/.ssh/{filename}.pub", shell=True)
 
+def setup_symlinks():
+    print("Setting up symlinks")
+    for source, target in SYMLINKS:
+        subprocess.run(["ln", "-fTs", str(CONFIG_DIR.joinpath(source)), target], check=True)
 
 if __name__=="__main__":
     add_ppas()
@@ -119,3 +134,4 @@ if __name__=="__main__":
     install_packages()
     change_display_settings()
     setup_github_keys()
+    setup_symlinks()
